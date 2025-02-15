@@ -2,6 +2,8 @@
  * 首页轮播图
  */
 
+import type { GoodsItem } from './global'
+
 export type BannerItem = {
   // id
   id: string
@@ -46,22 +48,7 @@ export type HotItem = {
 }
 
 /**
- *  猜你喜欢-商品类型
+ * 猜你喜欢-商品推荐
  */
 
-export type GuessItem = {
-  //id
-  id: string
-  // 商品名称
-  name: string
-  // 商品描述
-  desc: string
-  // 商品价格
-  price: number
-  // 商品图片
-  picture: string
-  // 商品折扣
-  discount: number
-  // 商品已下单数量
-  orderNum: number
-}
+export type GuessItem = GoodsItem

@@ -1,17 +1,53 @@
 <script setup lang="ts">
 import { getHomeGoodsGuessLikeAPI } from '@/services/home'
+import type { PageParams } from '@/types/global'
 import type { GuessItem } from '@/types/home'
 import { onMounted, ref } from 'vue'
 
-//
+// 页面页数
+const pageParams: Required<PageParams> = {
+  page: 1,
+  pageSize: 10,
+}
+
 // 猜你喜欢
 const guessList = ref<GuessItem[]>([])
+// 判断是否页数已满
+const finish = ref(false)
 const getHomeGoodsGuessLikeData = async () => {
-  const res = await getHomeGoodsGuessLikeAPI()
-  guessList.value = res.result.items
+  //如果页面已满退出
+  if (finish.value === true) {
+    return uni.showToast({
+      title: '没有更多数据~',
+      icon: 'none',
+    })
+  }
+  //获取数据
+  const res = await getHomeGoodsGuessLikeAPI(pageParams)
+  // 追加数据
+  guessList.value.push(...res.result.items)
+  // 分页
+  if (res.result.pages > pageParams.page) {
+    pageParams.page++
+  } else {
+    finish.value = true
+  }
 }
+
+//重置数据
+const resetData = () => {
+  pageParams.page = 1
+  guessList.value = []
+  finish.value = false
+}
+
+// 组件加载完成获取
 onMounted(() => {
   getHomeGoodsGuessLikeData()
+})
+defineExpose({
+  getMore: getHomeGoodsGuessLikeData,
+  resetData,
 })
 </script>
 
@@ -23,23 +59,21 @@ onMounted(() => {
   <view class="guess">
     <navigator
       class="guess-item"
-      v-for="item in 10"
-      :key="item"
-      :url="`/pages/goods/goods?id=4007498`"
+      v-for="item in guessList"
+      :key="item.id"
+      :url="`/pages/goods/goods?id=${item.id}`"
     >
-      <image
-        class="image"
-        mode="aspectFill"
-        src="https://pcapi-xiaotuxian-front-devtest.itheima.net/miniapp/uploads/goods_big_1.jpg"
-      ></image>
-      <view class="name"> 德国THORE男表 超薄手表男士休闲简约夜光石英防水直径40毫米 </view>
+      <image class="image" mode="aspectFill" :src="item.picture"></image>
+      <view class="name"> {{ item.name }} </view>
       <view class="price">
         <text class="small">¥</text>
-        <text>899.00</text>
+        <text>{{ item.price }}</text>
       </view>
     </navigator>
   </view>
-  <view class="loading-text"> 正在加载... </view>
+  <view class="loading-text">
+    {{ finish ? '没有更多数据~' : '正在加载... ' }}
+  </view>
 </template>
 
 <style lang="scss">
@@ -98,7 +132,6 @@ onMounted(() => {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
   }
   .price {
