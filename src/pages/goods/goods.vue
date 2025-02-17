@@ -4,6 +4,8 @@ import type { GoodsResult } from '@/types/goods'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import GoodsSkeleton from './components/goodsSkeleton.vue'
+import AddressPanel from './components/AddressPanel.vue'
+import ServicePanel from './components/ServicePanel.vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const query = defineProps<{
@@ -15,7 +17,6 @@ const goods = ref<GoodsResult>()
 const getGoodsByIdData = async () => {
   const res = await getGoodsAPI(query.id)
   goods.value = res.result
-  console.log(goods.value.mainPictures)
 }
 //骨架显示
 const Skeleton = ref(false)
@@ -30,6 +31,25 @@ const currentIndex = ref(0)
 const onChange: UniHelper.SwiperOnChange = (ev) => {
   currentIndex.value = ev.detail.current
 }
+// 点击图片变大
+const onTapImage = (url: string) => {
+  // 大图预览
+  uni.previewImage({
+    current: url,
+    urls: goods.value!.mainPictures,
+  })
+}
+// uni-ui 弹出层组件 ref
+const popup = ref<{
+  open: (type?: UniHelper.UniPopupType) => void
+  close: () => void
+}>()
+// 弹出层条件渲染
+const popupName = ref<'address' | 'service'>()
+const openPopup = (name: typeof popupName.value) => {
+  popupName.value = name
+  popup.value?.open()
+}
 </script>
 
 <template>
@@ -40,7 +60,7 @@ const onChange: UniHelper.SwiperOnChange = (ev) => {
       <view class="preview">
         <swiper @change="onChange" circular>
           <swiper-item v-for="item in goods?.mainPictures" :key="item">
-            <image mode="aspectFill" :src="item" />
+            <image @tap="onTapImage(item)" mode="aspectFill" :src="item" />
           </swiper-item>
         </swiper>
         <view class="indicator">
@@ -66,11 +86,11 @@ const onChange: UniHelper.SwiperOnChange = (ev) => {
           <text class="label">选择</text>
           <text class="text ellipsis"> 请选择商品规格 </text>
         </view>
-        <view class="item arrow">
+        <view @tap="openPopup('address')" class="item arrow">
           <text class="label">送至</text>
           <text class="text ellipsis"> 请选择收获地址 </text>
         </view>
-        <view class="item arrow">
+        <view @tap="openPopup('service')" class="item arrow">
           <text class="label">服务</text>
           <text class="text ellipsis"> 无忧退 快速退款 免费包邮 </text>
         </view>
@@ -141,6 +161,12 @@ const onChange: UniHelper.SwiperOnChange = (ev) => {
       <view class="buynow"> 立即购买 </view>
     </view>
   </view>
+
+  <!--弹出层-->
+  <uni-popup ref="popup" type="bottom" border-radius="10px 10px 0 0">
+    <AddressPanel v-if="popupName === 'address'" @close="popup?.close()" />
+    <ServicePanel v-if="popupName === 'service'" @close="popup?.close()" />
+  </uni-popup>
 </template>
 
 <style lang="scss">

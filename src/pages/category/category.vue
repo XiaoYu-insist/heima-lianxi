@@ -5,7 +5,7 @@ import type { CategoryTopItem } from '@/types/category'
 import type { BannerItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
-import categorySkeleton from './components/categorySkeleton.vue'
+import categorySkeleton from './components/CategorySkeleton.vue'
 // 点击高亮
 const activeIndex = ref(0)
 // 轮播图
@@ -86,7 +86,7 @@ onLoad(async () => {
       </scroll-view>
     </view>
   </view>
-  <categorySkeleton v-else />
+  <CategorySkeleton v-else />
 </template>
 
 <style lang="scss">
