@@ -1,5 +1,6 @@
 {
 	"easycom": {
+    // 是否开启自动扫描
 		"autoscan": true,
 		"custom": {
 			// uni-ui 规则如下配置
@@ -121,7 +122,7 @@
 				},
 				{
 					"path": "address-form/address-form"
-					
+
 				}
 			]
 		}
