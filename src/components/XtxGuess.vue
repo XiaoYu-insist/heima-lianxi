@@ -6,7 +6,7 @@ import { onMounted, ref } from 'vue'
 
 // 页面页数
 const pageParams: Required<PageParams> = {
-  page: 1,
+  page: import.meta.env ? 30 : 1,
   pageSize: 10,
 }
 

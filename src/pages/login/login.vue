@@ -39,7 +39,6 @@ const loginSuccess = (profile: LoginResult) => {
   setTimeout(() => {
     uni.switchTab({ url: '/pages/my/my' })
   }, 500)
-  console.log(memberstore.profile)
 }
 </script>
 
