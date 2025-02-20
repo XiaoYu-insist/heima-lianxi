@@ -2,5 +2,5 @@
 import cartMain from './components/cartMain.vue'
 </script>
 <template>
-  <cartMain />
+  <cartMain :type="1" />
 </template>

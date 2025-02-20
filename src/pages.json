@@ -1,6 +1,6 @@
 {
 	"easycom": {
-    // 是否开启自动扫描
+		// 是否开启自动扫描
 		"autoscan": true,
 		"custom": {
 			// uni-ui 规则如下配置
@@ -28,6 +28,12 @@
 		},
 		{
 			"path": "pages/cart/cart",
+			"style": {
+				"navigationBarTitleText": "购物车"
+			}
+		},
+		{
+			"path": "pages/cart/cart2",
 			"style": {
 				"navigationBarTitleText": "购物车"
 			}
@@ -122,7 +128,17 @@
 				},
 				{
 					"path": "address-form/address-form"
-
+				}
+			]
+		},
+		{
+			"root": "pagesOrder",
+			"pages": [
+				{
+					"path": "create/create",
+					"style": {
+						"navigationBarTitleText": "填写订单"
+					}
 				}
 			]
 		}

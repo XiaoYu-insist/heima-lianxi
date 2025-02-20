@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { deleteMemberAddressByIdAPI, getMemberAddressAPI } from '@/services/address';
-import type { AddressItem } from '@/types/address';
+import { deleteMemberAddressByIdAPI, getMemberAddressAPI } from '@/services/address'
+import { useAddressStores } from '@/stores/modules/address'
+import type { AddressItem } from '@/types/address'
 
-import { onShow } from '@dcloudio/uni-app';
-import { ref } from 'vue';
+import { onShow } from '@dcloudio/uni-app'
+import { ref } from 'vue'
 
 //
 const addressList = ref<AddressItem[]>()
-const getMemberAddressData = async ()=>{
+const getMemberAddressData = async () => {
   const res = await getMemberAddressAPI()
   addressList.value = res.result
 }
-onShow(()=>{
+onShow(() => {
   getMemberAddressData()
 })
 
@@ -30,6 +31,14 @@ const onDeleteAddress = (id: string) => {
     },
   })
 }
+
+const onAddressChange = (item: AddressItem) => {
+  // 修改地址
+  const addressStores = useAddressStores()
+  addressStores.setSelectedAddress(item)
+  // 返回上一页
+  uni.navigateBack()
+}
 </script>
 
 <template>
@@ -39,26 +48,26 @@ const onDeleteAddress = (id: string) => {
       <view v-if="addressList?.length" class="address">
         <uni-swipe-action class="address-list">
           <!-- 收货地址项 -->
-          <uni-swipe-action-item :right-options="[{text:'删除',style:{backgroundColor: '#dd524d',color:'#fff',fontSize:'15px'}}]" @tap="onDeleteAddress(item.id)" class="item" v-for="item in addressList" :key="item.id">
-            <view class="item-content">
+          <uni-swipe-action-item class="item" v-for="item in addressList" :key="item.id">
+            <view class="item-content" @tap="onAddressChange(item)">
               <view class="user">
-                {{item.receiver}}
-                <text class="contact">{{item.contact}}</text>
+                {{ item.receiver }}
+                <text class="contact">{{ item.contact }}</text>
                 <text v-if="item.isDefault" class="badge">默认</text>
               </view>
-              <view class="locate">{{item.fullLocation}}{{ item.address }}</view>
+              <view class="locate">{{ item.fullLocation }}{{ item.address }}</view>
               <navigator
                 class="edit"
                 hover-class="none"
                 :url="`/pagesMember/address-form/address-form?id=${item.id}`"
+                @tap.stop="() => {}"
               >
                 修改
               </navigator>
-
-              <!-- <template v-slot:right>
-                <button class="delete-button">删除</button>
-              </template> -->
             </view>
+            <template #right>
+              <button class="delete-button" @tap="onDeleteAddress(item.id)">删除</button>
+            </template>
           </uni-swipe-action-item>
         </uni-swipe-action>
       </view>
