@@ -1,8 +1,25 @@
 <script setup lang="ts">
+import { getMemberAddressAPI } from '@/services/address'
+import type { AddressItem } from '@/types/address'
+import { ref } from 'vue'
+
 //
 const emit = defineEmits<{
   (event: 'close'): void
 }>()
+
+const addressList = ref<AddressItem[]>()
+const getMemberAddressData = async () => {
+  const res = await getMemberAddressAPI()
+  addressList.value = res.result
+}
+getMemberAddressData()
+
+// 选中的地址
+const tapChecked = ref<string>()
+const onTapChecked = (id: string) => {
+  tapChecked.value = id
+}
 </script>
 
 <template>
@@ -13,20 +30,10 @@ const emit = defineEmits<{
     <view class="title">配送至</view>
     <!-- 内容 -->
     <view class="content">
-      <view class="item">
-        <view class="user">李明 13824686868</view>
-        <view class="address">北京市顺义区后沙峪地区安平北街6号院</view>
+      <view class="item" v-for="item in addressList" :key="item.id" @tap="onTapChecked(item.id)">
+        <view class="user">{{ item.receiver }} {{ item.contact }}</view>
+        <view class="address">{{ item.fullLocation }}{{ item.address }}</view>
         <text class="icon icon-checked"></text>
-      </view>
-      <view class="item">
-        <view class="user">王东 13824686868</view>
-        <view class="address">北京市顺义区后沙峪地区安平北街6号院</view>
-        <text class="icon icon-ring"></text>
-      </view>
-      <view class="item">
-        <view class="user">张三 13824686868</view>
-        <view class="address">北京市朝阳区孙河安平北街6号院</view>
-        <text class="icon icon-ring"></text>
       </view>
     </view>
     <view class="footer">
