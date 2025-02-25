@@ -6,7 +6,7 @@ import { onMounted, ref } from 'vue'
 
 // 页面页数
 const pageParams: Required<PageParams> = {
-  page: import.meta.env ? 30 : 1,
+  page: import.meta.env ? 15 : 1,
   pageSize: 10,
 }
 
@@ -16,7 +16,7 @@ const guessList = ref<GuessItem[]>([])
 const finish = ref(false)
 const getHomeGoodsGuessLikeData = async () => {
   //如果页面已满退出
-  if (finish.value === true) {
+  if (finish.value) {
     return uni.showToast({
       title: '没有更多数据~',
       icon: 'none',

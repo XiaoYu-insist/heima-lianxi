@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { OrderState, orderStateList } from '@/services/constants'
 import { getMemberOrderAPI } from '@/services/order'
+import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 import type { OrderItem, OrderListParams } from '@/types/order'
 import { onMounted, ref } from 'vue'
 
@@ -17,16 +18,48 @@ const queryParams: OrderListParams = {
   pageSize: 5,
   orderState: query.orderState,
 }
-
+// 判断页数是否已满
+const finish = ref(false)
 // 获取订单列表
 const orderList = ref<OrderItem[]>([])
 const getMemberOrderData = async () => {
+  if (finish.value) {
+    return uni.showToast({
+      title: '没有更多数据~',
+      icon: 'none',
+    })
+  }
+  // 加载数据
   const res = await getMemberOrderAPI(queryParams)
-  orderList.value = res.result.items
+  // 追加数据
+  orderList.value.push(...res.result.items)
+  // 下一页
+  if (res.result.page > queryParams.page!) {
+    queryParams.page!++
+  } else {
+    finish.value = true
+  }
 }
 onMounted(() => {
   getMemberOrderData()
 })
+
+// 订单支付
+const onOrderPay = async (id: string) => {
+  if (import.meta.env.DEV) {
+    // 开发环境操作
+    await getPayMockAPI({ orderId: id })
+  } else {
+    // 生产环境操作
+    const res = await getPayWxPayMiniPayAPI(id)
+    await wx.requestPayment(res.result)
+  }
+  // 提示完成
+  uni.showToast({ title: '支付成功！', icon: 'success' })
+  // 更新装填
+  const order = orderList.value.find((v) => v.id === id)
+  order!.orderState = OrderState.DaiFaHuo
+}
 </script>
 <template>
   <scroll-view scroll-y class="orders">
@@ -64,8 +97,8 @@ onMounted(() => {
       <!-- 订单操作按钮 -->
       <view class="action">
         <!-- 待付款状态：显示去支付按钮 -->
-        <template v-if="true">
-          <view class="button primary">去支付</view>
+        <template v-if="item.orderState === OrderState.DaiFuKuan">
+          <view class="button primary" @tap="onOrderPay(item.id)">去支付</view>
         </template>
         <template v-else>
           <navigator
@@ -82,7 +115,7 @@ onMounted(() => {
     </view>
     <!-- 底部提示文字 -->
     <view class="loading-text" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
-      {{ true ? '没有更多数据~' : '正在加载...' }}
+      {{ finish ? '没有更多数据~' : '正在加载...' }}
     </view>
   </scroll-view>
 </template>
